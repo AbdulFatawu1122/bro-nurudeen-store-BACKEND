@@ -1,0 +1,12 @@
+fastapi
+pydantic
+sqlalchemy
+bcrypt
+cryptography
+python-jose
+uvicorn
+passlib
+psycopg2
+dotenv
+websockets
+passlib[argon2]
