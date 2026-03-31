@@ -12,7 +12,7 @@ from fastapi import Depends
 
 
 #Database URL for local sql
-BASE_SQL_URL = "sqlite:///./records.db"
+BASE_SQL_URL = "sqlite:///./records-now.db"
 
 
 #Database connection engine

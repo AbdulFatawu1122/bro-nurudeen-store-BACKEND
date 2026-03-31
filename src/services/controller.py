@@ -79,3 +79,8 @@ async def NewSupply(quantity: int,amount: int, supplier_id: UUID, product_id: UU
 @router.delete("/delete-product")
 async def DeleteProduct(product_id:UUID, current_admin:CurrentAdmin, db:DbSession):
     return service.delete_product(product_id=product_id, current_admin=current_admin, db=db)
+
+
+@router.delete("/delete-supplier")
+async def DeleteSupplier(supplier_id:UUID, current_admin:CurrentAdmin, db:DbSession):
+    return service.delete_supplier(supplier_id=supplier_id, current_admin=current_admin, db=db)

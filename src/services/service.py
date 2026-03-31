@@ -114,7 +114,7 @@ def add_supplier(form_data: models.Supplier, current_admin: TokenData, db: Sessi
         firstname= form_data.firstname.lower(),
         lastname= form_data.lastname.lower(),
         phone=form_data.phone,
-        email=form_data.email
+        email=form_data.email,
     )
     db.add(db_new_supplier)
     db.commit()
@@ -209,13 +209,23 @@ def delete_product(product_id:UUID, current_admin:TokenData, db:Session):
             detail="Product Does not Exist",
             status_code=status.HTTP_404_NOT_FOUND
         )
+    
+def delete_supplier(supplier_id:UUID, current_admin:TokenData, db:Session):
+
+    supplier = db.query(Supplier).filter(Supplier.supplier_id == supplier_id).first()
+
+    if not supplier:
+        raise HTTPException(
+            detail="Supplier Does not Exist",
+            status_code=status.HTTP_404_NOT_FOUND
+        )
 
 
-    db.delete(product)
+    db.delete(supplier)
     db.commit()
 
     return {
-        "message": "product deleted succefully"
+        "message": "Supplier  deleted succefully"
     }
 
 
