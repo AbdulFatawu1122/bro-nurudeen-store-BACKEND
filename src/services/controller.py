@@ -117,3 +117,13 @@ async def update_product_price(new_price: float, product_id: UUID, db:DbSession,
         product_id=product_id,
         db=db, current_admin=current_admin
     )
+
+
+@router.delete("/delete-sale-history")
+async def DeleteSaleHistory(sale_id: UUID, current_admin: CurrentAdmin, db: DbSession):
+    return service.delete_sale_history(sale_id=sale_id, current_admin=current_admin, db=db)
+
+
+@router.delete("/delete-supply-history")
+async def DeleteSupplyHistory(supply_id: UUID, current_admin: CurrentAdmin, db: DbSession):
+    return service.delete_supply_history(supply_id=supply_id, current_admin=current_admin, db=db)

@@ -355,3 +355,36 @@ def update_product_price(db: Session, current_admin: TokenData, new_price: float
         "message": "Price of a product was succefully change",
         "data": product
     }
+
+def delete_sale_history(sale_id: UUID, current_admin: TokenData, db: Session):
+    sale_hist = db.query(SaleHistory).filter(SaleHistory.salehistId == sale_id).first()
+
+    if not sale_hist:
+        raise HTTPException(
+            detail="Sale History does not Exist",
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+
+    db.delete(sale_hist)
+    db.commit()
+
+    return {
+        "message": "Sale history deleted successfully"
+    }
+
+
+def delete_supply_history(supply_id: UUID, current_admin: TokenData, db: Session):
+    supply_hist = db.query(PurchaseHistory).filter(PurchaseHistory.purchaseHistId == supply_id).first()
+
+    if not supply_hist:
+        raise HTTPException(
+            detail="Supply History does not Exist",
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+
+    db.delete(supply_hist)
+    db.commit()
+
+    return {
+        "message": "Supply history deleted successfully"
+    }

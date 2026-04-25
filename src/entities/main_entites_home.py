@@ -33,17 +33,16 @@ class Sale(Base):
 
     sale_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     quantity_sold = Column(Integer, nullable=False, default=0)
-    customer_name = Column(Integer, nullable=True)
-    customer_number = Column(Integer, nullable=True)
+    customer_name = Column(String, nullable=True)
+    customer_number = Column(String, nullable=True)
     date = Column(Date, nullable=True, default=date.today)
     amount = Column(Float, nullable=True)
 
     payment_status = Column(Boolean, nullable=True) # 0/false for not payed(on credit) and 1/true means payed
 
     #foreign columns
-    admin_id = Column(UUID(as_uuid=True), ForeignKey("admins.admin_id"))
-    product_id = Column(UUID(as_uuid=True), ForeignKey("products.product_id"))
-
+    admin_id = Column(UUID(as_uuid=True), ForeignKey("admins.admin_id", ondelete="SET NULL"), nullable=True)
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.product_id", ondelete="SET NULL"), nullable=True)
 
 class SaleHistory(Base):
     __tablename__ = "saleshist"
@@ -81,11 +80,10 @@ class Purchase(Base):
 
     payment_status = Column(Boolean, nullable=True)
 
-
     #foreign keys
-    supplier_id = Column(UUID(as_uuid=True), ForeignKey("suppliers.supplier_id"))
-    product_id = Column(UUID(as_uuid=True), ForeignKey("products.product_id"))
-    admin_id = Column(UUID(as_uuid=True), ForeignKey("admins.admin_id"))
+    supplier_id = Column(UUID(as_uuid=True), ForeignKey("suppliers.supplier_id", ondelete="SET NULL"), nullable=True)
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.product_id", ondelete="SET NULL"), nullable=True)
+    admin_id = Column(UUID(as_uuid=True), ForeignKey("admins.admin_id", ondelete="SET NULL"), nullable=True)
 
 
 class PurchaseHistory(Base):
