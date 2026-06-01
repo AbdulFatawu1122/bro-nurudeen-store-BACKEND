@@ -113,7 +113,6 @@ def register_admin(db: Session, admin:models.RegisterAdmin, current_admin:UUID):
             password_hashed=hashed_password,
             position=admin.position.lower(),
         )
-
         #add the new admin
         db.add(db_new_admin)
         db.commit()

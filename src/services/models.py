@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import date
+from src.entities.main_entites_home import PaymentMethodEnum
 
 class AddProduct(BaseModel):
     name: str
@@ -21,6 +22,7 @@ class SaleMake(BaseModel):
     customer_number: str
     amount: float
     payment_status: bool
+    payed_using: PaymentMethodEnum | None = None
     date: date
 
     product_id: UUID

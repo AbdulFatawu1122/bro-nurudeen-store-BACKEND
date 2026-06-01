@@ -4,6 +4,7 @@ from . import models, service
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from ..auth.service import CurrentAdmin
+from ..entities.main_entites_home import Sale
 
 
 router = APIRouter(
@@ -28,4 +29,5 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 async def verify_token(token: str):
     service.verify_token(token=token)
     return {"message": "Token is a Valid Token"}
+
 

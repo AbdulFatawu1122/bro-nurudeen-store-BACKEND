@@ -97,6 +97,7 @@ def saleMake(form_data: models.SaleMake, current_admin:UUID, db: Session):
         amount=form_data.amount,
         product_id=form_data.product_id,
         payment_status= form_data.payment_status,
+        payed_using=form_data.payed_using,
         admin_id= current_admin,
         date=form_data.date
     )
@@ -111,6 +112,7 @@ def saleMake(form_data: models.SaleMake, current_admin:UUID, db: Session):
         customer_number= db_new_sale.customer_number,
         date= db_new_sale.date,
         amount= db_new_sale.amount,
+        payed_using=form_data.payed_using,
         current_method = "cash" if form_data.payment_status else "credit",
         first_payment_method= "cash" if form_data.payment_status else "credit",
         admin_name = f"{admin_who_process.firstname} {admin_who_process.lastname}" if admin_who_process else "N/A",
