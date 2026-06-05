@@ -461,18 +461,9 @@ def update_product_name(db: Session, current_admin: TokenData, new_name: str, pr
     }
 
 def get_business_cash(db: Session, month: Optional[int] = None, year: Optional[int] = None):
-    # Fetch the latest ledger entry to get the current balance up to the filtered period
-    balance_query = db.query(CashLedger)
-    if year is not None and month is not None:
-        next_month = month % 12 + 1
-        next_year = year + (month // 12)
-        end_date = datetime(next_year, next_month, 1, tzinfo=timezone.utc)
-        balance_query = balance_query.filter(CashLedger.date < end_date)
-    elif year is not None:
-        end_date = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
-        balance_query = balance_query.filter(CashLedger.date < end_date)
-        
-    latest_entry = balance_query.order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
+    # Fetch the latest ledger entry to get the current balance
+    # Added balance_after as a tie-breaker for identical timestamps
+    latest_entry = db.query(CashLedger).order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
     current_cash = latest_entry.balance_after if latest_entry else 0.0
     
     # We can still calculate the totals for the dashboard display
@@ -524,27 +515,17 @@ def get_cash_ledger(db: Session, limit: int = 100, page: int = 1, month: Optiona
     offset = (page - 1) * limit
     
     query = db.query(CashLedger)
-    balance_query = db.query(CashLedger)
     
     if month is not None:
         query = query.filter(extract('month', CashLedger.date) == month)
     if year is not None:
         query = query.filter(extract('year', CashLedger.date) == year)
         
-    if year is not None and month is not None:
-        next_month = month % 12 + 1
-        next_year = year + (month // 12)
-        end_date = datetime(next_year, next_month, 1, tzinfo=timezone.utc)
-        balance_query = balance_query.filter(CashLedger.date < end_date)
-    elif year is not None:
-        end_date = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
-        balance_query = balance_query.filter(CashLedger.date < end_date)
-        
     ledger = query.order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).limit(limit).offset(offset).all()
     total_count = query.count()
     
-    # Get the current balance up to the filtered period
-    latest_entry = balance_query.order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
+    # Get the current balance for the top of the table
+    latest_entry = db.query(CashLedger).order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
     current_cash = latest_entry.balance_after if latest_entry else 0.0
     
     return {
