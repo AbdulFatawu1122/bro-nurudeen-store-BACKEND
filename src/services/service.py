@@ -14,8 +14,9 @@ import uuid
 from . import models
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc, asc, func
+from sqlalchemy import or_, desc, asc, func, extract
 from datetime import datetime, timezone
+from typing import Optional
 
 
 def all_products(current_admin: TokenData, db:Session):
@@ -459,15 +460,26 @@ def update_product_name(db: Session, current_admin: TokenData, new_name: str, pr
         "data": product
     }
 
-def get_business_cash(db: Session):
+def get_business_cash(db: Session, month: Optional[int] = None, year: Optional[int] = None):
     # Fetch the latest ledger entry to get the current balance
     # Added balance_after as a tie-breaker for identical timestamps
     latest_entry = db.query(CashLedger).order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
     current_cash = latest_entry.balance_after if latest_entry else 0.0
     
     # We can still calculate the totals for the dashboard display
-    total_sales_cash = db.query(func.sum(SaleHistory.amount)).filter(SaleHistory.current_method == "cash").scalar() or 0.0
-    total_purchases_cash = db.query(func.sum(PurchaseHistory.amount)).filter(PurchaseHistory.current_method == "cash").scalar() or 0.0
+    sales_query = db.query(func.sum(SaleHistory.amount)).filter(SaleHistory.current_method == "cash")
+    purchases_query = db.query(func.sum(PurchaseHistory.amount)).filter(PurchaseHistory.current_method == "cash")
+
+    if month is not None:
+        sales_query = sales_query.filter(extract('month', SaleHistory.date) == month)
+        purchases_query = purchases_query.filter(extract('month', PurchaseHistory.date) == month)
+
+    if year is not None:
+        sales_query = sales_query.filter(extract('year', SaleHistory.date) == year)
+        purchases_query = purchases_query.filter(extract('year', PurchaseHistory.date) == year)
+
+    total_sales_cash = sales_query.scalar() or 0.0
+    total_purchases_cash = purchases_query.scalar() or 0.0
     
     return {
         "total_sales_cash": total_sales_cash,
@@ -499,10 +511,17 @@ def record_cash_transaction(db: Session, transaction_type: str, amount: float, f
     db.add(new_ledger_entry)
     return new_ledger_entry
 
-def get_cash_ledger(db: Session, limit: int = 100, page: int = 1):
+def get_cash_ledger(db: Session, limit: int = 100, page: int = 1, month: Optional[int] = None, year: Optional[int] = None):
     offset = (page - 1) * limit
-    ledger = db.query(CashLedger).order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).limit(limit).offset(offset).all()
-    total_count = db.query(CashLedger).count()
+    
+    query = db.query(CashLedger)
+    if month is not None:
+        query = query.filter(extract('month', CashLedger.date) == month)
+    if year is not None:
+        query = query.filter(extract('year', CashLedger.date) == year)
+        
+    ledger = query.order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).limit(limit).offset(offset).all()
+    total_count = query.count()
     
     # Get the current balance for the top of the table
     latest_entry = db.query(CashLedger).order_by(desc(CashLedger.date), desc(CashLedger.balance_after)).first()
